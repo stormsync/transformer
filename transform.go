@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/stormsync/collector"
@@ -20,15 +21,17 @@ type Transformer struct {
 	producer      *Provider
 	consumerTopic string
 	producerTopic string // transformed-weather-data
+	logger        *slog.Logger
 }
 
 // NewTransformer will return a pointer to a Transformer that allowes for pulling report
 // messages off the raw topic, converting each line into a marshaled protobuff,
 // and sending that off to the transformed topic.
-func NewTransformer(consumer *Consumer, provider *Provider) *Transformer {
+func NewTransformer(consumer *Consumer, provider *Provider, logger *slog.Logger) *Transformer {
 	return &Transformer{
 		consumer: consumer,
 		producer: provider,
+		logger:   logger,
 	}
 }
 
@@ -40,24 +43,30 @@ func (t *Transformer) GetMessage(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to get message: %w", err)
 	}
+	t.logger.Debug("incoming message", string(msg.Value))
 
 	reportType, err := getReportTypeFromHeader(msg.Headers)
 	if err != nil {
 		log.Println("error: ", err)
 	}
+	t.logger.Debug("report type", reportType.String())
 
 	lines := strings.Split(string(msg.Value), "\n")
 	for i, line := range lines {
 		if i == 0 || line == "" {
+			t.logger.Debug("skipping line number", i)
 			continue
 		}
 		msgBytes, err := t.processMessage(reportType, []byte(line))
 		if err != nil {
 			return fmt.Errorf("failed to process message: %w", err)
 		}
+
 		if err := t.producer.WriteMessage(ctx, msgBytes, reportType.String()); err != nil {
 			return nil
 		}
+		t.logger.Debug("message written to topic", t.producerTopic, "report type", reportType.String(), "line", line)
+
 	}
 
 	return nil

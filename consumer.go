@@ -3,7 +3,8 @@ package tranformer
 import (
 	"context"
 	"crypto/tls"
-	"log"
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -16,11 +17,15 @@ type Consumer struct {
 	Address  string
 	user     string
 	password string
+	logger   *slog.Logger
 }
 
 // NewConsumer generates a new kafka provider.
-func NewConsumer(address, topic, user, pw, groupID string) (*Consumer, error) {
-	mechanism, _ := scram.Mechanism(scram.SHA256, user, pw)
+func NewConsumer(address, topic, user, pw, groupID string, logger *slog.Logger) (*Consumer, error) {
+	mechanism, err := scram.Mechanism(scram.SHA256, user, pw)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create scram.Mechanism for auth: %w", err)
+	}
 	readerConfig := kafka.ReaderConfig{
 		GroupID:        groupID,
 		CommitInterval: time.Second,
@@ -38,6 +43,7 @@ func NewConsumer(address, topic, user, pw, groupID string) (*Consumer, error) {
 		Address:  address,
 		user:     user,
 		password: pw,
+		logger:   logger,
 	}, nil
 
 }
@@ -47,10 +53,12 @@ func NewConsumer(address, topic, user, pw, groupID string) (*Consumer, error) {
 func (c *Consumer) ReadMessage(ctx context.Context) (kafka.Message, error) {
 	message, err := c.Reader.ReadMessage(ctx)
 	if err != nil {
-		log.Println("error: ", err)
+		fmt.Errorf("failed to read message: %w", err)
+		return kafka.Message{}, err
 	}
 	if err := c.Reader.CommitMessages(ctx, message); err != nil {
-		log.Println("error on commit message: ", err)
+		fmt.Errorf("failed to commit message: %w", err)
 	}
+
 	return message, err
 }

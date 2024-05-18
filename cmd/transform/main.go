@@ -37,17 +37,17 @@ func main() {
 		log.Fatal("provider topic is required.  Use env var PROVIDER_TOPIC")
 	}
 
-	consumer, err := tranformer.NewConsumer(address, consumerTopic, user, pw, groupID)
+	consumer, err := tranformer.NewConsumer(address, consumerTopic, user, pw, groupID, logger)
 	if err != nil {
 		log.Fatal("unable to create consumer: ", err)
 	}
 
-	provider, err := tranformer.NewProvider(address, providerTopic, user, pw)
+	provider, err := tranformer.NewProvider(address, providerTopic, user, pw, logger)
 	if err != nil {
 		log.Fatal("unable to create provider: ", err)
 	}
 
-	transformer := tranformer.NewTransformer(consumer, provider)
+	transformer := tranformer.NewTransformer(consumer, provider, logger)
 
 	if err != nil {
 		log.Fatal("failed to create the collect: %w", err)

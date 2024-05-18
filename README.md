@@ -9,6 +9,9 @@ The performance can be improved as needed by utilizing channels during processin
 concurrency when reading in raw lines and getting them transformed and put back on a topic.   The utilization is pretty
 low and that hasn't been any issues regarding  speed, so I did  not feel the need to optimize prematurely.  
 
+Also, an in-memory cache or redis (might be overkill) can be used to de-deduplicate on a per-line basis to eliminate duplicate
+lines making it as far as a DB insert down the road before being rejected.  This is on the road map to get done.
+
 ## Features
 - **Data Consumption**: Reads data from a kafka topic.
 - **Transformation**: Applies transformation rules to data.
