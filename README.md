@@ -75,7 +75,7 @@ docker run  -e "KAFKA_ADDRESS=address:port" -e "KAFKA_USER=username" -e "KAFKA_P
 5. Create a new Pull Request.
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under the Attribution-NonCommercial-NoDerivatives 4.0 International License. See the LICENSE file for more details.
 
 ---
 
