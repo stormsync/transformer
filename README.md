@@ -1,5 +1,6 @@
 # Transformer
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/stormsync/transformer)](https://goreportcard.com/report/github.com/stormsync/transformer)
+---
 ## Overview
 Transformer is a microservice designed to take hail, tornado, and wind reports that are already on a kafka 
 topic (the collector microservice does this work)and handle data transformation between raw text, apply needed logic, 
@@ -48,6 +49,12 @@ PROVIDER_TOPIC="topic-name"  \
 CONSUMER_TOPIC="another-topic-name" \
 ./transformer
 ```
+### Logging Levels
+Settng the GO_LOG env var will control logging levels. This
+can be done globally, or you can specify different levels on a per package
+basis.
+```GO_LOG=info will set the log level to info globally.```
+```GO_LOG=info,transform=debug will set the log level to info by default, but sets it to debug for logs from transform.```
 
 ### Docker
 Build the Docker image:

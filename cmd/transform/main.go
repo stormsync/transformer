@@ -7,11 +7,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/cbrewster/slog-env"
+
 	"github.com/stormsync/transformer"
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slogenv.NewHandler(slog.NewTextHandler(os.Stderr, nil)))
 	var groupID = "transform-consumer"
 	address := os.Getenv("KAFKA_ADDRESS")
 	if address == "" {
