@@ -12,13 +12,12 @@ import (
 
 	"github.com/stormsync/transformer/report"
 
-	"github.com/segmentio/kafka-go"
 	"google.golang.org/protobuf/proto"
 )
 
 type Transformer struct {
-	consumer      *Consumer
-	producer      *Provider
+	consumer      Consumer
+	producer      Provider
 	consumerTopic string
 	producerTopic string // transformed-weather-data
 	logger        *slog.Logger
@@ -27,7 +26,7 @@ type Transformer struct {
 // NewTransformer will return a pointer to a Transformer that allowes for pulling report
 // messages off the raw topic, converting each line into a marshaled protobuff,
 // and sending that off to the transformed topic.
-func NewTransformer(consumer *Consumer, provider *Provider, logger *slog.Logger) *Transformer {
+func NewTransformer(consumer Consumer, provider Provider, logger *slog.Logger) *Transformer {
 	return &Transformer{
 		consumer: consumer,
 		producer: provider,
@@ -39,52 +38,58 @@ func NewTransformer(consumer *Consumer, provider *Provider, logger *slog.Logger)
 // applies business logic if needed, marshals, and moves onto
 // another topic for further processing.
 func (t *Transformer) GetMessage(ctx context.Context) error {
-	msg, err := t.consumer.ReadMessage(ctx)
+	readResponse, err := t.consumer.ReadMessage(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get message: %w", err)
 	}
-	t.logger.Debug("incoming message", string(msg.Value))
 
-	reportType, err := getReportTypeFromHeader(msg.Headers)
+	t.logger.Debug("incoming message", "message value ", string(readResponse.Value))
+
+	reportType, err := getReportTypeFromHeader(readResponse.Headers)
 	if err != nil {
 		log.Println("error: ", err)
 	}
-	t.logger.Debug("report type", reportType.String())
+	t.logger.Debug("report type", "type", reportType.String())
 
-	lines := strings.Split(string(msg.Value), "\n")
-	for i, line := range lines {
-		if i == 0 || line == "" {
-			t.logger.Debug("skipping line number", i)
-			continue
-		}
-		msgBytes, err := t.processMessage(reportType, []byte(line))
-		if err != nil {
-			return fmt.Errorf("failed to process message: %w", err)
-		}
-
-		if err := t.producer.WriteMessage(ctx, msgBytes, reportType.String()); err != nil {
-			return nil
-		}
-		t.logger.Debug("message written to topic", t.producerTopic, "report type", reportType.String(), "line", line)
-
+	msgBytes, err := t.processMessage(reportType, readResponse.Value)
+	if err != nil {
+		return fmt.Errorf("failed to process message: %w", err)
 	}
+
+	wp := WriterPayload{
+		Body: msgBytes,
+		Type: reportType.String(),
+	}
+	if err := t.producer.WriteMessage(ctx, wp); err != nil {
+
+		return fmt.Errorf("failed to write message for type %s: %w", reportType.String(), err)
+	}
+	t.logger.Debug("message written to topic", "topic", t.producerTopic, "report type", reportType.String(), "line", string(readResponse.Value))
 
 	return nil
 }
 
 // getReportTypeFromHeader extracts the report type from the message headers
-func getReportTypeFromHeader(hdrs []kafka.Header) (collector.ReportType, error) {
+func getReportTypeFromHeader(hdrs []ReaderHeader) (collector.ReportType, error) {
 	var rptType collector.ReportType
 	var err error
+
+	if len(hdrs) == 0 {
+		return rptType, errors.New("headers do not contain report type")
+	}
+
+	reportERR := errors.New("unable to find reportType key, cannot determine report type")
 	for _, v := range hdrs {
-		if strings.EqualFold(string(v.Value), "reportType") {
+		if strings.EqualFold(v.Key, "reportType") {
 			rptType, err = collector.FromString(string(v.Value))
 			if err != nil {
-				err = errors.Join(err, fmt.Errorf("unable to process report due to unknown type: %w", err))
+				return rptType, fmt.Errorf("unable to process report due to unknown type: %w", err)
 			}
+			reportERR = nil
+			break
 		}
 	}
-	return rptType, err
+	return rptType, reportERR
 }
 
 // processMessage performs the logic to get a generic line from an input message and turn it

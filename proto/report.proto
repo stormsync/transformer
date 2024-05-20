@@ -11,8 +11,8 @@ message HailMsg{
   string Location =5;
   string County = 6;
   string State = 7;
-  int32 Lat = 8;
-  int32 Lon = 9;
+  string Lat = 8;
+  string Lon = 9;
   string Remarks = 10;
 }
 
@@ -25,8 +25,8 @@ message WindMsg{
   string Location =5;
   string County = 6;
   string State = 7;
-  int32 Lat = 8;
-  int32 Lon = 9;
+  string Lat = 8;
+  string Lon = 9;
   string Remarks = 10;
 }
 
@@ -39,7 +39,7 @@ message TornadoMsg{
   string Location =5;
   string County = 6;
   string State = 7;
-  int32 Lat = 8;
-  int32 Lon = 9;
+  string Lat = 8;
+  string Lon = 9;
   string Remarks = 10;
 }

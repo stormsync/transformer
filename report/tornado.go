@@ -8,7 +8,7 @@ import (
 	report "github.com/stormsync/transformer/proto"
 )
 
-// FromCSVLineToTornadoMsg is the function that will do the actual work to get
+// FromCSVLineToTornado}Msg is the function that will do the actual work to get
 // a line transformed into a tornado message.
 func FromCSVLineToTornadoMsg(line []byte) (report.TornadoMsg, error) {
 	words := strings.Split(string(line), ",")
@@ -25,8 +25,8 @@ func FromCSVLineToTornadoMsg(line []byte) (report.TornadoMsg, error) {
 		Location:  location,
 		County:    words[3],
 		State:     words[4],
-		Lat:       StringToInt32(words[5]),
-		Lon:       StringToInt32(words[6]),
+		Lat:       words[5],
+		Lon:       words[6],
 		Remarks:   words[7],
 	}, nil
 }

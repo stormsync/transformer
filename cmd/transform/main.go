@@ -14,7 +14,7 @@ import (
 
 func main() {
 	logger := slog.New(slogenv.NewHandler(slog.NewTextHandler(os.Stderr, nil)))
-	var groupID = "transform-consumer"
+	var groupID = "transform-consume"
 	address := os.Getenv("KAFKA_ADDRESS")
 	if address == "" {
 		log.Fatal("address is required.  Use env var ADDRESS")
@@ -32,24 +32,25 @@ func main() {
 
 	consumerTopic := os.Getenv("CONSUMER_TOPIC")
 	if consumerTopic == "" {
-		log.Fatal("consumer topic is required.  Use env var CONSUMER_TOPIC")
+		log.Fatal("consume topic is required.  Use env var CONSUMER_TOPIC")
 	}
 	providerTopic := os.Getenv("PROVIDER_TOPIC")
 	if providerTopic == "" {
 		log.Fatal("provider topic is required.  Use env var PROVIDER_TOPIC")
 	}
 
-	consumer, err := tranformer.NewConsumer(address, consumerTopic, user, pw, groupID, logger)
+	newConsumer, err := tranformer.NewKConsumer(address, consumerTopic, user, pw, groupID, logger)
+
 	if err != nil {
-		log.Fatal("unable to create consumer: ", err)
+		log.Fatal("unable to create consume: ", err)
 	}
 
-	provider, err := tranformer.NewProvider(address, providerTopic, user, pw, logger)
+	provider, err := tranformer.NewKProvider(address, providerTopic, user, pw, logger)
 	if err != nil {
 		log.Fatal("unable to create provider: ", err)
 	}
 
-	transformer := tranformer.NewTransformer(consumer, provider, logger)
+	transformer := tranformer.NewTransformer(newConsumer, provider, logger)
 
 	if err != nil {
 		log.Fatal("failed to create the collect: %w", err)
