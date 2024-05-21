@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stormsync/collector"
+
 	report "github.com/stormsync/transformer/proto"
 )
 
@@ -18,6 +20,7 @@ func FromCSVLineToTornadoMsg(line []byte) (report.TornadoMsg, error) {
 	distance, direction, location := GetDistanceFromLocation(words[2])
 
 	return report.TornadoMsg{
+		Type:      collector.Tornado.String(),
 		Time:      StringToUnixTime(time.Now().UTC().Format(time.DateOnly), words[0]),
 		F_Scale:   StringToInt32(words[1]),
 		Distance:  distance,

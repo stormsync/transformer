@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"log/slog"
 	"strings"
 
@@ -47,7 +46,7 @@ func (t *Transformer) GetMessage(ctx context.Context) error {
 
 	reportType, err := getReportTypeFromHeader(readResponse.Headers)
 	if err != nil {
-		log.Println("error: ", err)
+		t.logger.Debug("getreporttypefromheader()", "error", err)
 	}
 	t.logger.Debug("report type", "type", reportType.String())
 
@@ -135,7 +134,6 @@ func processWindMessage(line []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to convert line to wind report %q: %w", string(line), err)
 	}
-	log.Printf("CSV Line turned into a report: \n%#+v\n", windMsg)
 
 	// implement any business logic before this line
 	mBytes, err := proto.Marshal(&windMsg)

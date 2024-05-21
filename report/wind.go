@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/stormsync/collector"
+
 	report "github.com/stormsync/transformer/proto"
 )
 
@@ -16,8 +18,9 @@ func FromCSVLineToWindMsg(line []byte) (report.WindMsg, error) {
 		return report.WindMsg{}, errors.New("line did not contain at least 8 columns")
 	}
 	distance, direction, location := GetDistanceFromLocation(words[2])
-	
+
 	return report.WindMsg{
+		Type:      collector.Wind.String(),
 		Time:      StringToUnixTime(time.Now().UTC().Format(time.DateOnly), words[0]),
 		Speed:     StringToInt32(words[1]),
 		Distance:  distance,

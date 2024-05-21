@@ -14,6 +14,8 @@ message HailMsg{
   string Lat = 8;
   string Lon = 9;
   string Remarks = 10;
+  string Type = 11;
+
 }
 
 
@@ -28,6 +30,8 @@ message WindMsg{
   string Lat = 8;
   string Lon = 9;
   string Remarks = 10;
+  string Type = 11;
+
 }
 
 
@@ -42,4 +46,5 @@ message TornadoMsg{
   string Lat = 8;
   string Lon = 9;
   string Remarks = 10;
+  string Type = 11;
 }
