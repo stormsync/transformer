@@ -32,4 +32,5 @@ func FromCSVLineToTornadoMsg(line []byte) (report.TornadoMsg, error) {
 		Lon:       words[6],
 		Remarks:   words[7],
 	}, nil
+	// xx
 }
