@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "github.com/jason-costello/weather";
+
+message HailMsg{
+  int64 Time =1;
+  int32 Size =2;
+  int32 Distance = 3;
+  string Direction =4;
+  string Location =5;
+  string County = 6;
+  string State = 7;
+  string Lat = 8;
+  string Lon = 9;
+  string Remarks = 10;
+  string Type = 11;
+
+}
+
+
+message WindMsg{
+  int64 Time =1;
+  int32 Speed =2;
+  int32 Distance = 3;
+  string Direction =4;
+  string Location =5;
+  string County = 6;
+  string State = 7;
+  string Lat = 8;
+  string Lon = 9;
+  string Remarks = 10;
+  string Type = 11;
+
+}
+
+
+message TornadoMsg{
+  int64 Time =1;
+  int32 F_Scale =2;
+  int32 Distance = 3;
+  string Direction =4;
+  string Location =5;
+  string County = 6;
+  string State = 7;
+  string Lat = 8;
+  string Lon = 9;
+  string Remarks = 10;
+  string Type = 11;
+}

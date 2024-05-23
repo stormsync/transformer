@@ -1,0 +1,27 @@
+#config/upstash-development.yaml
+services:
+  collector:
+    vault-path: stormsync/collector/upstash-development
+    interval: 10s
+    collection-urls:
+      - "WindURL, https://www.spc.noaa.gov/climo/reports/today_wind.csv"
+      - "HailURL, https://www.spc.noaa.gov/climo/reports/today_hail.csv"
+      - "TornadoURL, https://www.spc.noaa.gov/climo/reports/today_torn.csv"
+  kafka:
+    host: organic-ray-9236-us1-kafka.upstash.io
+    port: 9092
+    topic: raw-weather-report
+    user: kafka-user
+    password: kafka-password
+  redis:
+    host: gentle-kingfish-45342.upstash.io
+    port: 6379
+    user: redis-user
+    password: redis-password
+    db: 0
+  vault:
+    protocol: http
+    host: 192.168.1.100
+    port: 8200
+    path: stormsync/collector/upstash-development/
+
