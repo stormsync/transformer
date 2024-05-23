@@ -10,14 +10,16 @@ import (
 	"github.com/stormsync/collector"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/stormsync/transformer/consumer"
+	"github.com/stormsync/transformer/provider"
 	"github.com/stormsync/transformer/report"
 
 	"google.golang.org/protobuf/proto"
 )
 
 type Transformer struct {
-	consumer Consumer
-	producer Provider
+	consumer consumer.Consumer
+	producer provider.Provider
 	tracer   trace.Tracer
 
 	consumerTopic string
@@ -28,7 +30,7 @@ type Transformer struct {
 // NewTransformer will return a pointer to a Transformer that allowes for pulling report
 // messages off the raw topic, converting each line into a marshaled protobuff,
 // and sending that off to the transformed topic.
-func NewTransformer(consumer Consumer, provider Provider, tracer trace.Tracer, logger *slog.Logger) *Transformer {
+func NewTransformer(consumer consumer.Consumer, provider provider.Provider, tracer trace.Tracer, logger *slog.Logger) *Transformer {
 	return &Transformer{
 		tracer:   tracer,
 		consumer: consumer,
@@ -60,7 +62,7 @@ func (t *Transformer) GetMessage(ctx context.Context) error {
 		return fmt.Errorf("failed to process message: %w", err)
 	}
 
-	wp := WriterPayload{
+	wp := provider.WriterPayload{
 		Body: msgBytes,
 		Type: reportType.String(),
 	}
@@ -74,7 +76,7 @@ func (t *Transformer) GetMessage(ctx context.Context) error {
 }
 
 // getReportTypeFromHeader extracts the report type from the message headers
-func getReportTypeFromHeader(hdrs []ReaderHeader) (collector.ReportType, error) {
+func getReportTypeFromHeader(hdrs []consumer.ReaderHeader) (collector.ReportType, error) {
 	var rptType collector.ReportType
 	var err error
 

@@ -18,7 +18,9 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.25.0"
 
-	"github.com/stormsync/transformer/internal"
+	"github.com/stormsync/transformer"
+	"github.com/stormsync/transformer/consumer"
+	"github.com/stormsync/transformer/provider"
 )
 
 func main() {
@@ -64,18 +66,18 @@ func main() {
 		log.Fatal("provider topic is required.  Use env var PROVIDER_TOPIC")
 	}
 
-	newConsumer, err := internal.NewKConsumer(address, consumerTopic, user, pw, groupID, logger)
+	newConsumer, err := consumer.NewKConsumer(address, consumerTopic, user, pw, groupID, logger)
 
 	if err != nil {
 		log.Fatal("unable to create consume: ", err)
 	}
 
-	provider, err := internal.NewKProvider(address, providerTopic, user, pw, logger)
+	provider, err := provider.NewKProvider(address, providerTopic, user, pw, logger)
 	if err != nil {
 		log.Fatal("unable to create provider: ", err)
 	}
 
-	transformer := internal.NewTransformer(newConsumer, provider, tracer, logger)
+	transformer := transformer.NewTransformer(newConsumer, provider, tracer, logger)
 
 	if err != nil {
 		log.Fatal("failed to create the collect: %w", err)
